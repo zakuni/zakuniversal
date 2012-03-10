@@ -10,8 +10,9 @@ BT_APP_ID = config['BT_APP_ID']
 @db = @conn[config['mongo_db']]
 @coll = @db[config['mongo_coll']]
 
-bt = BingTranslator.new(BT_APP_ID)
-lang = bt.supported_language_codes
+@bt = BingTranslator.new(BT_APP_ID)
+langs = @bt.supported_language_codes
+@lang = langs[rand(langs.length)]
 
 tweets = Twitter.user_timeline("zakuni")
 
@@ -23,11 +24,17 @@ def store(tweet)
 	end
 end
 
-tweets.each do |tweet| 
-	store(tweet)
-	puts bt.translate(tweet.text, params = {:to => lang[rand(lang.length)]}) 
+def translate(text)
+	@bt.translate(text, parmas = {:to => @lang})
 end
 
-@coll.find.each do |doc|
-	puts doc.inspect 
+tweets.each do |tweet| 
+	store(tweet)
 end
+
+@coll.find.each do |tweet|
+	text = tweet["text"]
+	puts text 
+	puts translate(text)
+end
+
