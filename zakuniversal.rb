@@ -7,8 +7,9 @@ require 'mongo'
 CLIENT_ID = @conf['CLIENT_ID']
 CLIENT_SECRET = @conf['CLIENT_SECRET']
 
-@conn = Mongo::Connection.new(@conf['mongo_server'], @conf['mongo_port'])
-@db = @conn[@conf['mongo_db']]
+@conn = Mongo::MongoClient.new(@conf['mongo_server'], @conf['mongo_port'])
+@db = @conn.db(@conf['mongo_db'])
+@db.authenticate(@conf['db_user'], @conf['db_pass'])
 @base_coll = @db[@conf['mongo_coll']]
 @translated_coll = @db['translatedtweets']
 
