@@ -4,14 +4,15 @@ require 'twitter'
 require 'mongo'
 
 @conf = YAML.load_file('./config.yaml')
-BT_APP_ID = @conf['BT_APP_ID']
+CLIENT_ID = @conf['CLIENT_ID']
+CLIENT_SECRET = @conf['CLIENT_SECRET']
 
 @conn = Mongo::Connection.new(@conf['mongo_server'], @conf['mongo_port'])
 @db = @conn[@conf['mongo_db']]
 @base_coll = @db[@conf['mongo_coll']]
 @translated_coll = @db['translatedtweets']
 
-@bt = BingTranslator.new(BT_APP_ID)
+@bt = BingTranslator.new(CLIENT_ID, CLIENT_SECRET)
 @langs = @bt.supported_language_codes
 
 puts @base_coll.find().limit(-1).skip(rand(@base_coll.count)).next
