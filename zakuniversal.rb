@@ -15,9 +15,9 @@ CLIENT_SECRET = @conf['CLIENT_SECRET']
 @bt = BingTranslator.new(CLIENT_ID, CLIENT_SECRET)
 @langs = @bt.supported_language_codes
 
-puts @base_coll.find().limit(-1).skip(rand(@base_coll.count)).next
+# puts @base_coll.find().limit(-1).skip(rand(@base_coll.count)).next
 
-Twitter.configure do |config|
+client = Twitter::REST::Client.new do |config|
   config.consumer_key = @conf['consumer_key'] 
   config.consumer_secret = @conf['consumer_secret']
   config.oauth_token = @conf['oauth_token']
@@ -38,7 +38,7 @@ def translate(text)
 	{"lang" => lang, "text" => @bt.translate(text, parmas = {:to => lang})}
 end
 
-base_tweets = Twitter.user_timeline("zakuni")
+base_tweets = client.user_timeline("zakuni")
 base_tweets.each do |tweet| 
 	store(tweet)
 end
