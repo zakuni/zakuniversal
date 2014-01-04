@@ -4,19 +4,21 @@ require 'twitter'
 require 'mongo'
 
 @conf = YAML.load_file('./config.yaml')
-BT_APP_ID = @conf['BT_APP_ID']
+CLIENT_ID = @conf['CLIENT_ID']
+CLIENT_SECRET = @conf['CLIENT_SECRET']
 
-@conn = Mongo::Connection.new(@conf['mongo_server'], @conf['mongo_port'])
-@db = @conn[@conf['mongo_db']]
+@conn = Mongo::MongoClient.new(@conf['mongo_server'], @conf['mongo_port'])
+@db = @conn.db(@conf['mongo_db'])
+@db.authenticate(@conf['db_user'], @conf['db_pass'])
 @base_coll = @db[@conf['mongo_coll']]
 @translated_coll = @db['translatedtweets']
 
-@bt = BingTranslator.new(BT_APP_ID)
+@bt = BingTranslator.new(CLIENT_ID, CLIENT_SECRET)
 @langs = @bt.supported_language_codes
 
-puts @base_coll.find().limit(-1).skip(rand(@base_coll.count)).next
+# puts @base_coll.find().limit(-1).skip(rand(@base_coll.count)).next
 
-Twitter.configure do |config|
+client = Twitter::REST::Client.new do |config|
   config.consumer_key = @conf['consumer_key'] 
   config.consumer_secret = @conf['consumer_secret']
   config.oauth_token = @conf['oauth_token']
@@ -37,7 +39,7 @@ def translate(text)
 	{"lang" => lang, "text" => @bt.translate(text, parmas = {:to => lang})}
 end
 
-base_tweets = Twitter.user_timeline("zakuni")
+base_tweets = client.user_timeline("zakuni")
 base_tweets.each do |tweet| 
 	store(tweet)
 end
